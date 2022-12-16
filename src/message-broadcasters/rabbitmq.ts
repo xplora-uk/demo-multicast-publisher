@@ -12,7 +12,7 @@ export function newRabbitMqMessageBroadcaster(settings: IMessageBroadcasterConf)
 
     async broadcast(input: IBroadcastInput): Promise<IBroadcastOutput> {
       const func = 'RabbitMqMessageBroadcaster.broadcast';
-      let success = false, error = '';      
+      let success = false, error = '', routingKey = '';      
 
       // TODO: optimize channel creation?
       // ask the connection manager for a ChannelWrapper
@@ -22,10 +22,10 @@ export function newRabbitMqMessageBroadcaster(settings: IMessageBroadcasterConf)
       // `sendToQueue()` returns a Promise which is fulfilled or rejected when the message is actually sent or not.
       try {
         // TODO: check queue options
-        await channelWrapper.assertExchange(input.exchange, 'direct', { durable: false });
+        await channelWrapper.assertExchange(input.exchange, 'fanout', { durable: false });
 
-        // publish message
-        await channelWrapper.publish(input.exchange, input.topic, input.payload);
+        // publish message; routingKey nil
+        await channelWrapper.publish(input.exchange, routingKey, Buffer.from(input.payload, 'utf8'));
         success = true;
       } catch (err) {
         error = err instanceof Error ? err.message : 'Unknown error';
@@ -35,6 +35,16 @@ export function newRabbitMqMessageBroadcaster(settings: IMessageBroadcasterConf)
       }      
 
       return { success, error };
+    }
+
+    async close(): Promise<void> {
+      if (this._connection) {
+        try {
+          await this._connection.close();
+        } catch (err) {
+          console.error('RabbitMqMessageBroadcaster.close error', err);
+        }
+      }
     }
 
   }

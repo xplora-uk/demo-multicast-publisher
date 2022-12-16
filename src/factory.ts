@@ -6,17 +6,15 @@ export async function factory(penv = process.env) {
 
   // TODO: security by API Key?
 
-  app.use(express.text({ limit: '1MB' }));
   app.use(express.json({ limit: '1MB' }));
 
-  const exchange = penv.MB_EXCHANGE || 'direct';
-
+  const exchange = penv.MB_EXCHANGE || 'amq.fanout';
   const config = {
     http: {
       port: Number.parseInt(penv.MB_HTTP_PORT || '3000'),
     },
     messageBroadcaster: {
-      kind: penv.MP_KIND || 'rabbitmq',
+      kind: penv.MB_KIND || 'rabbitmq',
       exchange,
       conf: {
         hostname : penv.MB_HOSTNAME || 'localhost',
@@ -32,10 +30,18 @@ export async function factory(penv = process.env) {
 
   async function handleTopic(req: Request, res: Response) {
     try {
+      if (typeof req.body !== 'object') throw new Error('valid JSON expected for request body');
+
+      const sender = req.get('x-app-id') || 'unknown'; // TODO: validate sender
       const { topic } = req.params as Record<string, string>;
+      const meta = { sender, exchange, topic };
+
       // TODO: validate req.body based on the contract of that topic
-      const payload = JSON.stringify(req.body);
-      const result  = await msgBroadcaster.broadcast({ exchange, topic, payload });
+      const payloadObj = Object.assign(req.body, { meta });
+      console.info('input', payloadObj);
+
+      const payload = JSON.stringify(payloadObj);
+      const result  = await msgBroadcaster.broadcast({ exchange, payload });
       res.json(result);
     } catch (err) {
       console.error('message-broadcaster error', err);

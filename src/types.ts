@@ -1,7 +1,6 @@
 export interface IMessageBroadcasterSettings {
   kind    : 'rabbitmq' | 'redis' | 'kafka' | string;
   conf    : IMessageBroadcasterConf;
-  exchange: string;
 }
 
 export interface IMessageBroadcasterConf {
@@ -24,7 +23,6 @@ export interface IMessageBroadcaster {
 
 export interface IBroadcastInput {
   exchange: string;
-  topic   : string;
   payload : string;
 }
 
