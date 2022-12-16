@@ -1,6 +1,6 @@
-# message-broadcaster-demo
+# multicast-publisher-demo
 
-demo for a message broadcaster
+demo for a multicast publisher
 
 ## requirements
 
@@ -33,8 +33,8 @@ Layout:
 
 ```plain
 src/
-  message-broadcasters/
-    rabbitmq.ts  message broadcaster adapted for rabbitmq
+  multicast-publishers/
+    rabbitmq.ts  multicast message publisher adapted for rabbitmq
     index.ts     loader for this folder
   factory.ts     prepares dependencies
   index.ts       main entry file of this codebase; prepared express app and starts it.

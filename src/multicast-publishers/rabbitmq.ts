@@ -1,17 +1,17 @@
 import amqp from 'amqp-connection-manager';
 import { IAmqpConnectionManager } from 'amqp-connection-manager/dist/esm/AmqpConnectionManager';
-import { IBroadcastInput, IBroadcastOutput, IMessageBroadcaster, IMessageBroadcasterConf } from '../types';
+import { IMulticastPublishInput, IMulticastPublishOutput, IMulticastPublisher, IMulticastPublisherConf } from '../types';
 
-export function newRabbitMqMessageBroadcaster(settings: IMessageBroadcasterConf): Promise<IMessageBroadcaster> {
+export function newRabbitMqMulticastPublisher(settings: IMulticastPublisherConf): Promise<IMulticastPublisher> {
 
-  class RabbitMqMessageBroadcaster implements IMessageBroadcaster {
+  class RabbitMqMulticastPublisher implements IMulticastPublisher {
 
     constructor(protected _connection: IAmqpConnectionManager) {
       // nothing to do
     }
 
-    async broadcast(input: IBroadcastInput): Promise<IBroadcastOutput> {
-      const func = 'RabbitMqMessageBroadcaster.broadcast';
+    async publish(input: IMulticastPublishInput): Promise<IMulticastPublishOutput> {
+      const func = 'RabbitMqMulticastPublisher.broadcast';
       let success = false, error = '', routingKey = '';      
 
       // TODO: optimize channel creation?
@@ -42,7 +42,7 @@ export function newRabbitMqMessageBroadcaster(settings: IMessageBroadcasterConf)
         try {
           await this._connection.close();
         } catch (err) {
-          console.error('RabbitMqMessageBroadcaster.close error', err);
+          console.error('RabbitMqMulticastPublisher.close error', err);
         }
       }
     }
@@ -58,5 +58,5 @@ export function newRabbitMqMessageBroadcaster(settings: IMessageBroadcasterConf)
     },
   );
 
-  return Promise.resolve(new RabbitMqMessageBroadcaster(connection));
+  return Promise.resolve(new RabbitMqMulticastPublisher(connection));
 }

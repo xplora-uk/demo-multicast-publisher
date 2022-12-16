@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { newMessageBroadcaster } from './message-broadcasters';
+import { newMulticastPublisher } from './multicast-publishers';
 
 const HEADER_APP_ID = 'x-app-id';
 
@@ -10,25 +10,25 @@ export async function factory(penv = process.env) {
 
   app.use(express.json({ limit: '1MB' }));
 
-  const exchange = penv.MB_EXCHANGE || 'amq.fanout';
+  const exchange = penv.MCP_EXCHANGE || 'amq.fanout';
   const config = {
     http: {
-      port: Number.parseInt(penv.MB_HTTP_PORT || '3000'),
+      port: Number.parseInt(penv.MCP_HTTP_PORT || '3000'),
     },
     messageBroadcaster: {
-      kind: penv.MB_KIND || 'rabbitmq',
+      kind: penv.MCP_KIND || 'rabbitmq',
       exchange,
       conf: {
-        hostname : penv.MB_HOSTNAME || 'localhost',
-        port     : Number.parseInt(penv.MB_PORT || '0'),
-        username : penv.MB_USERNAME || '',
-        password : penv.MB_PASSWORD || '',
+        hostname : penv.MCP_HOSTNAME || 'localhost',
+        port     : Number.parseInt(penv.MCP_PORT || '0'),
+        username : penv.MCP_USERNAME || '',
+        password : penv.MCP_PASSWORD || '',
         heartbeat: 30,
       },
     },
   };
 
-  const msgBroadcaster = await newMessageBroadcaster(config.messageBroadcaster);
+  const mcPublisher = await newMulticastPublisher(config.messageBroadcaster);
 
   async function handleTopic(req: Request, res: Response) {
     try {
@@ -43,7 +43,7 @@ export async function factory(penv = process.env) {
       console.info('input', payloadObj);
 
       const payload = JSON.stringify(payloadObj);
-      const result  = await msgBroadcaster.broadcast({ exchange, payload });
+      const result  = await mcPublisher.publish({ exchange, payload });
       res.json(result);
     } catch (err) {
       console.error('message-broadcaster error', err);
@@ -53,5 +53,5 @@ export async function factory(penv = process.env) {
 
   app.post('/:topic', handleTopic);
 
-  return { app, config, msgBroadcaster, handleTopic };
+  return { app, config, mcPublisher, handleTopic };
 }
