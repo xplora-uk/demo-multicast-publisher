@@ -10,7 +10,7 @@ export function newRabbitMqMulticastPublisher(settings: IMulticastPublisherConf)
       // nothing to do
     }
 
-    async publish(input: IMulticastPublishInput): Promise<IMulticastPublishOutput> {
+    async multicastPublish(input: IMulticastPublishInput): Promise<IMulticastPublishOutput> {
       const func = 'RabbitMqMulticastPublisher.broadcast';
       let success = false, error = '', routingKey = '';      
 

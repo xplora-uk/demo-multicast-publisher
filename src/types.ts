@@ -18,7 +18,7 @@ export interface IMulticastPublisherConf {
 }
 
 export interface IMulticastPublisher {
-  publish(input: IMulticastPublishInput): Promise<IMulticastPublishOutput>;
+  multicastPublish(input: IMulticastPublishInput): Promise<IMulticastPublishOutput>;
 }
 
 export interface IMulticastPublishInput {

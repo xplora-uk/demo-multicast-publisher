@@ -39,11 +39,11 @@ export async function factory(penv = process.env) {
       const meta = { sender, exchange, topic };
 
       // TODO: validate req.body based on the contract of that topic
-      const payloadObj = Object.assign(req.body, { meta });
+      const payloadObj = { meta, data: req.body };
       console.info('input', payloadObj);
 
       const payload = JSON.stringify(payloadObj);
-      const result  = await mcPublisher.publish({ exchange, payload });
+      const result  = await mcPublisher.multicastPublish({ exchange, payload });
       res.json(result);
     } catch (err) {
       console.error('message-broadcaster error', err);
