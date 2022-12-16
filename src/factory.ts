@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
 import { newMessageBroadcaster } from './message-broadcasters';
 
+const HEADER_APP_ID = 'x-app-id';
+
 export async function factory(penv = process.env) {
   const app = express();
 
@@ -32,7 +34,7 @@ export async function factory(penv = process.env) {
     try {
       if (typeof req.body !== 'object') throw new Error('valid JSON expected for request body');
 
-      const sender = req.get('x-app-id') || 'unknown'; // TODO: validate sender
+      const sender = req.get(HEADER_APP_ID) || 'unknown'; // TODO: validate sender
       const { topic } = req.params as Record<string, string>;
       const meta = { sender, exchange, topic };
 
