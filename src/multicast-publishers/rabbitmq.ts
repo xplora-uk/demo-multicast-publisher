@@ -19,9 +19,8 @@ export function newRabbitMqMulticastPublisher(settings: IMulticastPublisherConf)
       const channelWrapper = this._connection.createChannel();
 
       // NOTE: If we're not currently connected, these will be queued up in memory until we connect.
-      // `sendToQueue()` returns a Promise which is fulfilled or rejected when the message is actually sent or not.
       try {
-        // TODO: check queue options
+        // TODO: check options
         await channelWrapper.assertExchange(input.exchange, 'fanout', { durable: false });
 
         // publish message; routingKey nil
