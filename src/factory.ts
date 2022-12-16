@@ -6,8 +6,6 @@ const HEADER_APP_ID = 'x-app-id';
 export async function factory(penv = process.env) {
   const app = express();
 
-  // TODO: security by API Key?
-
   app.use(express.json({ limit: '1MB' }));
 
   const exchange = penv.MCP_EXCHANGE || 'amq.fanout';
@@ -31,6 +29,7 @@ export async function factory(penv = process.env) {
   const mcPublisher = await newMulticastPublisher(config.messageBroadcaster);
 
   async function handleTopic(req: Request, res: Response) {
+    // TODO: security by API Key?
     try {
       if (typeof req.body !== 'object') throw new Error('valid JSON expected for request body');
 
@@ -46,7 +45,7 @@ export async function factory(penv = process.env) {
       const result  = await mcPublisher.multicastPublish({ exchange, payload });
       res.json(result);
     } catch (err) {
-      console.error('message-broadcaster error', err);
+      console.error('multicast-publisher error', err);
       res.json({ error: 'Server error' });
     }
   }
